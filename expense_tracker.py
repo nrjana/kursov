@@ -8,7 +8,7 @@ from datetime import datetime
 database_url = os.getenv('postgresql://neondb_owner:npg_soDn7mHl2xJf@ep-red-haze-a85ugmii-pooler.eastus2.azure.neon.tech/neondb?sslmode=require')
 
 # Проверка, что строка подключения получена
-print(f"Database URL: {'postgresql://neondb_owner:npg_soDn7mHl2xJf@ep-red-haze-a85ugmii-pooler.eastus2.azure.neon.tech/neondb?sslmode=require'}")
+print(f"Database URL: {database_url}")
 
 # Connect to the Neon PostgreSQL database
 conn = psycopg2.connect("dbname='neondb' user='neondb_owner' password='npg_soDn7mHl2xJf' host='ep-red-haze-a85ugmii-pooler.eastus2.azure.neon.tech' port='5432' sslmode='require'")
@@ -113,10 +113,14 @@ def delete_category():
     update_category_list()
 
 def update_category_list():
+    # Проверка, что переменная category_tree существует
     if category_tree:
         category_tree.delete(*category_tree.get_children())
         c.execute("SELECT * FROM categories")
-        for row in c.fetchall():
+        rows = c.fetchall()
+        if not rows:  # Если нет категорий в базе данных
+            messagebox.showinfo("Информация", "Нет категорий для отображения.")
+        for row in rows:
             category_tree.insert("", "end", values=row)
 
 def update_table():
@@ -229,16 +233,32 @@ frame_buttons = tk.Frame(root, bg="#DCC6E0")
 frame_buttons.pack(pady=10)
 btn_edit_balance = ttk.Button(frame_buttons, text="Редактировать баланс", command=update_balance)
 btn_edit_balance.pack(side="left", padx=10)
-btn_add_category = ttk.Button(frame_buttons, text="Добавить категорию", command=add_category)
-btn_add_category.pack(side="left", padx=10)
-btn_delete_category = ttk.Button(frame_buttons, text="Удалить категорию", command=delete_category)
-btn_delete_category.pack(side="left", padx=10)
+btn_category_list = ttk.Button(frame_buttons, text="Категории", command=lambda: open_category_window())
+btn_category_list.pack(side="left", padx=10)
 
-category_tree = ttk.Treeview(root, columns=("ID", "Категория"), show="headings", height=5)
-category_tree.heading("ID", text="ID")
-category_tree.heading("Категория", text="Категория")
-category_tree.pack(pady=10)
 
+# Функция для отображения окна с категориями
+def open_category_window():
+    global category_tree  # Указываем, что это глобальная переменная
+    category_window = tk.Toplevel(root)
+    category_window.title("Категории")
+    category_window.geometry("380x400")
+
+    # Вставляем кнопки внутри окна категорий
+    frame_buttons = tk.Frame(category_window, bg="#DCC6E0")
+    frame_buttons.pack(pady=10)
+    btn_add_category = ttk.Button(frame_buttons, text="Добавить категорию", command=add_category)
+    btn_add_category.pack(side="left", padx=10)
+    btn_delete_category = ttk.Button(frame_buttons, text="Удалить категорию", command=delete_category)
+    btn_delete_category.pack(side="left", padx=10)
+
+    # Создание и отображение списка категорий
+    category_tree = ttk.Treeview(category_window, columns=("Категория"), show="headings", height=10)
+    category_tree.heading("Категория", text="Категория")
+    category_tree.pack(pady=10)
+
+
+    # Основное окно для расходов
 tree = ttk.Treeview(root, columns=("ID", "Сумма", "Категория", "Дата"), show="headings")
 tree.heading("ID", text="ID")
 tree.heading("Сумма", text="Сумма")
