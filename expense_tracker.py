@@ -113,8 +113,7 @@ def delete_category():
     update_category_list()
 
 def update_category_list():
-    # Проверка, что переменная category_tree существует
-    if category_tree:
+    if category_tree:  # Убедитесь, что category_tree существует
         category_tree.delete(*category_tree.get_children())
         c.execute("SELECT * FROM categories")
         rows = c.fetchall()
@@ -236,7 +235,6 @@ btn_edit_balance.pack(side="left", padx=10)
 btn_category_list = ttk.Button(frame_buttons, text="Категории", command=lambda: open_category_window())
 btn_category_list.pack(side="left", padx=10)
 
-
 # Функция для отображения окна с категориями
 def open_category_window():
     global category_tree  # Указываем, что это глобальная переменная
@@ -257,8 +255,9 @@ def open_category_window():
     category_tree.heading("Категория", text="Категория")
     category_tree.pack(pady=10)
 
+      # Обновляем список категорий
 
-    # Основное окно для расходов
+# Основное окно для расходов
 tree = ttk.Treeview(root, columns=("ID", "Сумма", "Категория", "Дата"), show="headings")
 tree.heading("ID", text="ID")
 tree.heading("Сумма", text="Сумма")
